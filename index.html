@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>คนโนนสะอาด นับคาร์บเพื่อสุขภาพดี</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        input, select {
+            width: 100%;
+			font-family: 'Prompt', sans-serif;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+			font-family: 'Prompt', sans-serif;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>เครื่องมือวิเคราะห์โภชนาการ</h1>
+    <form id="nutritionForm">
+        <select id="gender" required>
+            <option value="">เลือกเพศ</option>
+            <option value="male">ชาย</option>
+            <option value="female">หญิง</option>
+        </select>
+        
+        <input type="number" id="age" placeholder="อายุ (ปี)" required>
+        <input type="number" id="weight" placeholder="น้ำหนัก (กก.)" required>
+        <input type="number" id="height" placeholder="ส่วนสูง (ซม.)" required>
+        
+        <select id="activity" required>
+            <option value="">ระดับการออกกำลังกาย</option>
+            <option value="sedentary">นั่งทำงานตลอดวัน</option>
+            <option value="light">ออกกำลังกายน้อย 1-3 วัน/สัปดาห์ </option>
+            <option value="moderate">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
+            <option value="active">ออกกำลังกายมาก 6-7 วัน/สัปดาห์</option>
+            <option value="veryActive">ออกกำลังกายอย่างหนักหรือใช้แรงงานหนัก</option>
+        </select>
+        
+        <button type="submit">คำนวณ</button>
+    </form>
+
+    <script>
+        function calculateNutrition(gender, age, weight, height, activity) {
+            // คำนวณ BMR ด้วยสูตร Harris-Benedict
+            const bmr = gender === 'male' 
+                ? 66 + (13.7 * weight) + (5 * height) - (6.8 * age)
+                : 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
+            
+            // ปัจจัยการคำนวณพลังงานตามระดับกิจกรรม
+            const activityFactors = {
+                sedentary: 1.2,
+                light: 1.375,
+                moderate: 1.55,
+                active: 1.725,
+                veryActive: 1.9
+            };
+            
+            // คำนวณพลังงานทั้งวัน
+            const dailyCalories = bmr * activityFactors[activity];
+            
+            // คำนวณสัดส่วนสารอาหาร
+            const macronutrients = {
+                carbs: {
+                    percentage: 50,
+                    gramsPerCalorie: 4,
+                    grams: Math.round((dailyCalories * 0.5) / 4)
+                },
+                protein: {
+                    percentage: 20,
+                    gramsPerCalorie: 4,
+                    grams: Math.round((dailyCalories * 0.2) / 4)
+                },
+                fat: {
+                    percentage: 30,
+                    gramsPerCalorie: 9,
+                    grams: Math.round((dailyCalories * 0.3) / 9)
+                }
+            };
+            
+            // คำนวณ BMI
+            const bmi = weight / Math.pow(height/100, 2);
+            
+            return { bmr, dailyCalories, macronutrients, bmi };
+        }
+
+        function interpretBMI(bmi) {
+            if (bmi < 18.5) return 'น้ำหนักน้อย (Underweight)';
+            if (bmi < 23) return 'ปกติ (Normal)';
+            if (bmi < 25) return 'ท้วม (Overweight)';
+            if (bmi < 30) return 'อ้วน (Obese)';
+            return 'อ้วนมาก (Severely Obese)';
+        }
+
+        function getFoodRecommendations(macronutrients) {
+            const carbGrams = macronutrients.carbs.grams;
+            const proteinGrams = macronutrients.protein.grams;
+            const carbUnits = Math.round(carbGrams / 15);
+            const proteinUnits = Math.round(proteinGrams / 20);
+
+            const mealsDistribution = {
+                breakfast: { 
+                    carbs: Math.round(carbUnits * 0.3),
+                    protein: Math.round(proteinUnits * 0.3)
+                },
+                lunch: { 
+                    carbs: Math.round(carbUnits * 0.4),
+                    protein: Math.round(proteinUnits * 0.4)
+                },
+                dinner: { 
+                    carbs: Math.round(carbUnits * 0.3),
+                    protein: Math.round(proteinUnits * 0.3)
+                }
+            };
+
+            const foodExamples = {
+                breakfast: [
+                    `ข้าวสวย ${mealsDistribution.breakfast.carbs} ทัพพี + ไข่ ${mealsDistribution.breakfast.protein} ฟอง`,
+                    `โจ๊ก ${mealsDistribution.breakfast.carbs} ถ้วย + เนื้อสัตว์ ${mealsDistribution.breakfast.protein} คำ`,
+                    `ขนมปังโฮลวีท ${Math.round(mealsDistribution.breakfast.carbs * 1.5)} แผ่น + นมถั่วเหลือง`
+                ],
+                lunch: [
+                    `ข้าวสวย ${mealsDistribution.lunch.carbs} ทัพพี + ไก่ ${mealsDistribution.lunch.protein} คำ`,
+                    `ก๋วยเตี๋ยว ${mealsDistribution.lunch.carbs} ถ้วย + ปลา ${mealsDistribution.lunch.protein} ชิ้น`,
+                    `ข้าวต้ม ${mealsDistribution.lunch.carbs} ถ้วย + เต้าหู้ ${mealsDistribution.lunch.protein} ก้อน`
+                ],
+                dinner: [
+                    `ข้าวกล้อง ${mealsDistribution.dinner.carbs} ทัพพี + เนื้อปลา ${mealsDistribution.dinner.protein} คำ`,
+                    `สปาเก็ตตี้ ${mealsDistribution.dinner.carbs} จาน + ไก่งวง ${mealsDistribution.dinner.protein} ชิ้น`,
+                    `สลัดผัก + โปรตีนทดแทน ${mealsDistribution.dinner.protein} ส่วน`
+                ]
+            };
+
+            return { mealsDistribution, foodExamples };
+        }
+
+        document.getElementById('nutritionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const gender = document.getElementById('gender').value;
+            const age = parseFloat(document.getElementById('age').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const activity = document.getElementById('activity').value;
+            
+            // คำนวณโภชนาการ
+            const nutrition = calculateNutrition(gender, age, weight, height, activity);
+            
+            // รับคำแนะนำอาหาร
+            const foodRecommendations = getFoodRecommendations(nutrition.macronutrients);
+            
+            Swal.fire({
+                title: 'ผลการวิเคราะห์โภชนาการ',
+                html: `
+                    <p>BMI: ${nutrition.bmi.toFixed(1)} (${interpretBMI(nutrition.bmi)})</p>
+                    <p>พลังงานที่ใช้ต่อวัน: ${nutrition.dailyCalories.toFixed(0)} แคลอรี</p>
+                    <h3>สารอาหารรายวัน</h3>
+                    <p>คาร์โบไฮเดรต: <strong style="color:red;">${nutrition.macronutrients.carbs.grams} กรัม</strong></p>
+                    <p>โปรตีน: <strong style="color:green;">${nutrition.macronutrients.protein.grams} กรัม</strong></p>
+                    <p>ไขมัน: <strong style="color:blue;">${nutrition.macronutrients.fat.grams} กรัม</strong></p>
+                    <h3>คำแนะนำการบริโภคอาหาร</h3>
+                    <p><strong>มื้อเช้า:</strong> ${foodRecommendations.foodExamples.breakfast.join(' หรือ ')}</p>
+                    <p><strong>มื้อกลางวัน:</strong> ${foodRecommendations.foodExamples.lunch.join(' หรือ ')}</p>
+                    <p><strong>มื้อเย็น:</strong> ${foodRecommendations.foodExamples.dinner.join(' หรือ ')}</p>
+                `,
+                icon: 'info'
+            });
+        });
+    </script>
+</body>
+</html>
