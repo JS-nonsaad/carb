@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>คนโนนสะอาด นับคาร์บเพื่อสุขภาพดี</title>
+    <title>วิเคราะห์การบริโภคอาหาร</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -15,7 +15,7 @@
         }
         input, select {
             width: 100%;
-			font-family: 'Prompt', sans-serif;
+            font-family: 'Prompt', sans-serif;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ddd;
@@ -23,7 +23,6 @@
         }
         button {
             width: 100%;
-			font-family: 'Prompt', sans-serif;
             padding: 10px;
             background-color: #4CAF50;
             color: white;
@@ -34,7 +33,7 @@
     </style>
 </head>
 <body>
-    <h2>คนโนนสะอาด นับคาร์บเพื่อสุขภาพดี</h2>
+    <h1>สสอ.โนนสะอาด ชวนคนโนนสะอาดนับคาร์บ</h1>
     <form id="nutritionForm">
         <select id="gender" required>
             <option value="">เลือกเพศ</option>
@@ -49,109 +48,87 @@
         <select id="activity" required>
             <option value="">ระดับการออกกำลังกาย</option>
             <option value="sedentary">นั่งทำงานตลอดวัน</option>
-            <option value="light">ออกกำลังกายน้อย 1-3 วัน/สัปดาห์ </option>
-            <option value="moderate">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
-            <option value="active">ออกกำลังกายมาก 6-7 วัน/สัปดาห์</option>
-            <option value="veryActive">ออกกำลังกายอย่างหนักหรือใช้แรงงานหนัก</option>
+            <option value="light">ออกกำลังกายน้อย</option>
+            <option value="moderate">ออกกำลังกายปานกลาง</option>
+            <option value="active">ออกกำลังกายมาก</option>
+            <option value="veryActive">ออกกำลังกายอย่างหนัก</option>
         </select>
         
         <button type="submit">คำนวณ</button>
     </form>
 
     <script>
+        // ฟังก์ชันคำนวณโภชนาการ
         function calculateNutrition(gender, age, weight, height, activity) {
-            // คำนวณ BMR ด้วยสูตร Harris-Benedict
-            const bmr = gender === 'male' 
-                ? 66 + (13.7 * weight) + (5 * height) - (6.8 * age)
-                : 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
-            
-            // ปัจจัยการคำนวณพลังงานตามระดับกิจกรรม
-            const activityFactors = {
+            // คำนวณ BMR (Basal Metabolic Rate)
+            let bmr;
+            if (gender === 'male') {
+                bmr = 66 + (13.7 * weight) + (5 * height) - (6.8 * age);
+            } else {
+                bmr = 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
+            }
+
+            // คำนวณ TDEE (Total Daily Energy Expenditure) ตามระดับกิจกรรม
+            const activityMultipliers = {
                 sedentary: 1.2,
                 light: 1.375,
                 moderate: 1.55,
                 active: 1.725,
                 veryActive: 1.9
             };
-            
-            // คำนวณพลังงานทั้งวัน
-            const dailyCalories = bmr * activityFactors[activity];
-            
-            // คำนวณสัดส่วนสารอาหาร
-            const macronutrients = {
-                carbs: {
-                    percentage: 50,
-                    gramsPerCalorie: 4,
-                    grams: Math.round((dailyCalories * 0.5) / 4)
-                },
-                protein: {
-                    percentage: 20,
-                    gramsPerCalorie: 4,
-                    grams: Math.round((dailyCalories * 0.2) / 4)
-                },
-                fat: {
-                    percentage: 30,
-                    gramsPerCalorie: 9,
-                    grams: Math.round((dailyCalories * 0.3) / 9)
+            const tdee = bmr * activityMultipliers[activity];
+
+            // คำนวณ Macronutrients (โปรตีน ไขมัน คาร์โบไฮเดรต)
+            const proteinGrams = Math.round((tdee * 0.3) / 4); // 30% ของพลังงานจากโปรตีน
+            const fatGrams = Math.round((tdee * 0.25) / 9);    // 25% ของพลังงานจากไขมัน
+            const carbGrams = Math.round((tdee * 0.45) / 4);   // 45% ของพลังงานจากคาร์โบไฮเดรต
+
+            return {
+                macronutrients: {
+                    protein: { grams: proteinGrams },
+                    fat: { grams: fatGrams },
+                    carbs: { grams: carbGrams }
                 }
             };
-            
-            // คำนวณ BMI
-            const bmi = weight / Math.pow(height/100, 2);
-            
-            return { bmr, dailyCalories, macronutrients, bmi };
         }
 
-        function interpretBMI(bmi) {
-            if (bmi < 18.5) return 'น้ำหนักน้อย (Underweight)';
-            if (bmi < 23) return 'ปกติ (Normal)';
-            if (bmi < 25) return 'ท้วม (Overweight)';
-            if (bmi < 30) return 'อ้วน (Obese)';
-            return 'อ้วนมาก (Severely Obese)';
+        // ฟังก์ชันคำนวณคาร์บหน่วย
+        function calculateCarbUnits(carbGrams) {
+            // คาร์บ 1 หน่วย = 15 กรัมคาร์โบไฮเดรต
+            return Math.round(carbGrams / 15);
         }
 
-        function getFoodRecommendations(macronutrients) {
-            const carbGrams = macronutrients.carbs.grams;
-            const proteinGrams = macronutrients.protein.grams;
-            const carbUnits = Math.round(carbGrams / 15);
-            const proteinUnits = Math.round(proteinGrams / 20);
-
-            const mealsDistribution = {
-                breakfast: { 
-                    carbs: Math.round(carbUnits * 0.3),
-                    protein: Math.round(proteinUnits * 0.3)
-                },
-                lunch: { 
-                    carbs: Math.round(carbUnits * 0.4),
-                    protein: Math.round(proteinUnits * 0.4)
-                },
-                dinner: { 
-                    carbs: Math.round(carbUnits * 0.3),
-                    protein: Math.round(proteinUnits * 0.3)
-                }
+        // ฟังก์ชันกระจายคาร์บหน่วยตามมื้ออาหาร
+        function getCarbDistribution(carbUnits) {
+            return {
+                breakfast: Math.round(carbUnits * 0.3), // มื้อเช้า 30%
+                lunch: Math.round(carbUnits * 0.4),     // มื้อกลางวัน 40%
+                dinner: Math.round(carbUnits * 0.3)     // มื้อเย็น 30%
             };
+        }
 
-            const foodExamples = {
+        // ฟังก์ชันสร้างคำแนะนำอาหาร
+        function generateDetailedFoodRecommendations(carbDistribution) {
+            return {
                 breakfast: [
-                    `ข้าวสวย ${mealsDistribution.breakfast.carbs} ทัพพี + ไข่ ${mealsDistribution.breakfast.protein} ฟอง`,
-                    `โจ๊ก ${mealsDistribution.breakfast.carbs} ถ้วย + เนื้อสัตว์ ${mealsDistribution.breakfast.protein} คำ`,
-                    `ขนมปังโฮลวีท ${Math.round(mealsDistribution.breakfast.carbs * 1.5)} แผ่น + นมถั่วเหลือง`
+                    `ข้าวสวย ${Math.floor(carbDistribution.breakfast * 0.8)} ทัพพี (${Math.floor(carbDistribution.breakfast * 0.8)} คาร์บ)`,
+                    `ขนมปัง ${Math.floor(carbDistribution.breakfast * 0.6)} แผ่น (${Math.floor(carbDistribution.breakfast * 0.6)} คาร์บ)`,
+                    โจ๊ก ${Math.floor(carbDistribution.breakfast * 0.7)} ถ้วย (${Math.floor(carbDistribution.breakfast * 0.7)} คาร์บ)
                 ],
                 lunch: [
-                    `ข้าวสวย ${mealsDistribution.lunch.carbs} ทัพพี + ไก่ ${mealsDistribution.lunch.protein} คำ`,
-                    `ก๋วยเตี๋ยว ${mealsDistribution.lunch.carbs} ถ้วย + ปลา ${mealsDistribution.lunch.protein} ชิ้น`,
-                    `ข้าวต้ม ${mealsDistribution.lunch.carbs} ถ้วย + เต้าหู้ ${mealsDistribution.lunch.protein} ก้อน`
+                    `ข้าวสวย ${Math.floor(carbDistribution.lunch * 0.9)} ทัพพี (${Math.floor(carbDistribution.lunch * 0.9)} คาร์บ)`,
+                    `ก๋วยเตี๋ยว ${Math.floor(carbDistribution.lunch * 0.8)} ถ้วย (${Math.floor(carbDistribution.lunch * 0.8)} คาร์บ)`,
+                    ข้าวต้ม ${Math.floor(carbDistribution.lunch * 0.7)} ถ้วย (${Math.floor(carbDistribution.lunch * 0.7)} คาร์บ)
                 ],
                 dinner: [
-                    `ข้าวกล้อง ${mealsDistribution.dinner.carbs} ทัพพี + เนื้อปลา ${mealsDistribution.dinner.protein} คำ`,
-                    `สปาเก็ตตี้ ${mealsDistribution.dinner.carbs} จาน + ไก่งวง ${mealsDistribution.dinner.protein} ชิ้น`,
-                    `สลัดผัก + โปรตีนทดแทน ${mealsDistribution.dinner.protein} ส่วน`
+                    `ข้าวกล้อง ${Math.floor(carbDistribution.dinner * 0.9)} ทัพพี (${Math.floor(carbDistribution.dinner * 0.9)} คาร์บ)`,
+                    `สปาเก็ตตี้ ${Math.floor(carbDistribution.dinner * 0.8)} จาน (${Math.floor(carbDistribution.dinner * 0.8)} คาร์บ)`,
+                    ผักรวม ${Math.floor(carbDistribution.dinner * 0.5)} ทัพพี (${Math.floor(carbDistribution.dinner * 0.5)} คาร์บ)
                 ]
             };
-
-            return { mealsDistribution, foodExamples };
         }
 
+        // จัดการการส่งฟอร์ม
         document.getElementById('nutritionForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -164,24 +141,57 @@
             // คำนวณโภชนาการ
             const nutrition = calculateNutrition(gender, age, weight, height, activity);
             
-            // รับคำแนะนำอาหาร
-            const foodRecommendations = getFoodRecommendations(nutrition.macronutrients);
+            // คำนวณหน่วยคาร์บ
+            const carbUnits = calculateCarbUnits(nutrition.macronutrients.carbs.grams);
+            const carbDistribution = getCarbDistribution(carbUnits);
+            const foodRecommendations = generateDetailedFoodRecommendations(carbDistribution);
             
-            Swal.fire({
-                title: 'ผลการวิเคราะห์โภชนาการ',
-                html: `
-                    <p>BMI: ${nutrition.bmi.toFixed(1)} (${interpretBMI(nutrition.bmi)})</p>
-                    <p>พลังงานที่ใช้ต่อวัน: ${nutrition.dailyCalories.toFixed(0)} แคลอรี</p>
-                    <h3>สารอาหารรายวัน</h3>
-                    <p>คาร์โบไฮเดรต: <strong style="color:red;">${nutrition.macronutrients.carbs.grams} กรัม</strong></p>
-                    <p>โปรตีน: <strong style="color:green;">${nutrition.macronutrients.protein.grams} กรัม</strong></p>
-                    <p>ไขมัน: <strong style="color:blue;">${nutrition.macronutrients.fat.grams} กรัม</strong></p>
-                    <h3>คำแนะนำการบริโภคอาหาร</h3>
-                    <p><strong>มื้อเช้า:</strong> ${foodRecommendations.foodExamples.breakfast.join(' หรือ ')}</p>
-                    <p><strong>มื้อกลางวัน:</strong> ${foodRecommendations.foodExamples.lunch.join(' หรือ ')}</p>
-                    <p><strong>มื้อเย็น:</strong> ${foodRecommendations.foodExamples.dinner.join(' หรือ ')}</p>
-                `,
-                icon: 'info'
+            // แสดงผลลัพธ์ด้วย SweetAlert2
+            Swal.mixin({
+                confirmButtonText: 'ถัดไป &rarr;',
+                showCancelButton: true,
+                cancelButtonText: 'ปิด',
+                progressSteps: ['1', '2']
+            }).queue([
+                {
+                    title: 'ข้อมูลโภชนาการ',
+                    html: `
+                        <h3>โปรตีน</h3>
+                        <p><strong style="color:green;">${nutrition.macronutrients.protein.grams} กรัม</strong></p>
+                        
+                        <h3>ไขมัน</h3>
+                        <p><strong style="color:blue;">${nutrition.macronutrients.fat.grams} กรัม</strong></p>
+                        
+                        <h3>คาร์โบไฮเดรต</h3>
+                        <p><strong style="color:red;">${nutrition.macronutrients.carbs.grams} กรัม</strong></p>
+                        
+                        <h3>จำนวนคาร์บ (1 คาร์บ = 15 กรัม)</h3>
+                        <p><strong style="color:purple;">${carbUnits} หน่วย</strong></p>
+                    `,
+                    background: '#f0f0f0',
+                    confirmButtonColor: '#6f42c1'
+                },
+                {
+                    title: `คำแนะนำการบริโภคอาหารใน 1 วัน (${carbUnits} คาร์บ)`,
+                    html: `
+                        <h4>มื้อเช้า (${carbDistribution.breakfast} คาร์บ):</h4>
+                        <p>${foodRecommendations.breakfast.join(' หรือ ')}</p>
+                        <h4>มื้อกลางวัน (${carbDistribution.lunch} คาร์บ):</h4>
+                        <p>${foodRecommendations.lunch.join(' หรือ ')}</p>
+                        <h4>มื้อเย็น (${carbDistribution.dinner} คาร์บ):</h4>
+                        <p>${foodRecommendations.dinner.join(' หรือ ')}</p>
+                    `,
+                    background: '#fff3cd',
+                    confirmButtonColor: '#ffc107'
+                }
+            ]).then((result) => {
+                if (result.value) {
+                    Swal.fire({
+                        title: 'วิเคราะห์สำเร็จ!',
+                        text: 'คำแนะนำโภชนาการครบถ้วน',
+                        icon: 'success'
+                    });
+                }
             });
         });
     </script>
