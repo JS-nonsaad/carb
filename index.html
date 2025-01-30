@@ -81,6 +81,7 @@
         .highlight {
             color: #e74c3c;
             font-weight: bold;
+			font-size: 20px;
         }
 
         .macro-box {
@@ -94,6 +95,7 @@
             padding: 15px;
             border-radius: 10px;
             text-align: center;
+			font-size: 18px;
             background: linear-gradient(145deg, #ffffff, #f8f9fa);
             border: 2px solid #eee;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -213,18 +215,21 @@
                         <div class="macro-box">
                             <div class="macro-item">
                                 <h3>คาร์โบไฮเดรต</h3>
-                                <p>ควบคุมพลังงานจากคาร์โบไฮเดรตไม่ให้เกิน 20% (แคลอรี่/วัน)</p>
-                                <p class="highlight">${carbsCalories.toFixed(0)} kcal</p>
+                                <p  class="highlight">${carbsCalories.toFixed(0)} kcal</p>
+<p>ควบคุมพลังงานจากคาร์โบไฮเดรตไม่ให้เกิน 20% (แคลอรี่/วัน)</p>
+                                
                             </div>
                             <div class="macro-item">
                                 <h3>ปริมาณคาร์โบไฮเดรต</h3>
-                                <p>คำนวณจากพลังงานจากคาร์โบไฮเดรต ให้พลังงาน 4 แคลอรี่</p>
                                 <p class="highlight">${carbsGram.toFixed(0)} กรัม/วัน</p>
+<p>คำนวณจากพลังงานจากคาร์โบไฮเดรต ให้พลังงาน 4 แคลอรี่</p>
+                                
                             </div>
                             <div class="macro-item">
                                 <h3>คาร์บต่อวัน</h3>
-                                <p>คำนวณจากปริมาณคาร์โบไฮเดรต 15 กรัม หรือข้าวหนึ่ง 1 ทัพพี</p>
                                 <p class="highlight">${carbCount.toFixed(1)} คาร์บ/วัน</p>
+                                <p>คำนวณจากปริมาณคาร์โบไฮเดรต 15 กรัม หรือข้าวสวย 1 ทัพพี</p>
+
                             </div>
                         </div>
 
