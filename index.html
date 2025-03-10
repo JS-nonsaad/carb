@@ -20,7 +20,7 @@
 
         .container {
             max-width: 800px;
-		text-align: center;
+            text-align: center;
             margin: 20px auto;
             background: white;
             padding: 30px;
@@ -82,7 +82,7 @@
         .highlight {
             color: #e74c3c;
             font-weight: bold;
-			font-size: 20px;
+            font-size: 20px;
         }
 
         .macro-box {
@@ -96,15 +96,15 @@
             padding: 15px;
             border-radius: 10px;
             text-align: center;
-			font-size: 18px;
+            font-size: 18px;
             background: linear-gradient(145deg, #ffffff, #f8f9fa);
             border: 2px solid #eee;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .macro-item:nth-child(1) { background: #ffcccb; } /* ชมพูอ่อน */
+        .macro-item:nth-child(1) { background: #CBFEFF; } /* ชมพูอ่อน */
         .macro-item:nth-child(2) { background: #c1ffc1; } /* เขียวอ่อน */
-        .macro-item:nth-child(3) { background: #d8bfd8; } /* ม่วงอ่อน */
+        .macro-item:nth-child(3) { background: #FFF2CC; } /* ม่วงอ่อน */
 
         .bmi-status {
             padding: 10px;
@@ -131,6 +131,97 @@
             .button-group, .macro-box {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* สไตล์สำหรับการพิมพ์ */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .print-container {
+                margin: 0;
+                padding: 15px;
+                max-width: 100%;
+                font-size: 12px;
+                line-height: 1.2;
+            }
+            
+            .print-header {
+                text-align: center;
+                margin-bottom: 15px;
+				font-size: 14px;
+            }
+            
+            .print-macro-box {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                margin: 10px 0;
+            }
+            
+            .print-macro-item {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: center;
+                border-radius: 5px;
+            }
+            
+            .print-macro-item h3 {
+                margin-top: 0;
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+            
+            .print-macro-item p {
+                margin: 5px 0;
+                font-size: 12px;
+            }
+            
+            .print-highlight {
+                font-weight: bold;
+                font-size: 16px;
+                color: #000;
+            }
+            
+            .print-bmi-status {
+                padding: 5px;
+                border-radius: 5px;
+                margin: 10px 0;
+                font-weight: bold;
+				font-size: 20px;
+                text-align: center;
+            }
+            
+            .print-recommendations {
+                margin-top: 10px;
+                border: 1px solid #ddd;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            
+            .print-recommendations h4 {
+                margin-top: 0;
+                margin-bottom: 5px;
+            }
+            
+            .print-recommendations ul {
+                margin: 5px 0;
+                padding-left: 20px;
+            }
+            
+            .print-recommendations li {
+                margin-bottom: 3px;
+                font-size: 11px;
+            }
+            
+            /* สไตล์สำหรับสีพื้นหลังเมื่อพิมพ์ */
+            .print-underweight { background: #cce5ff; color: black; }
+            .print-normal { background: #d4edda; color: black; }
+            .print-overweight { background: #fff3cd; color: black; }
+            .print-obese { background: #f8d7da; color: black; }
         }
     </style>
 </head>
@@ -174,6 +265,9 @@
         </div>
     </div>
 
+    <!-- ส่วนที่ซ่อนไว้สำหรับการพิมพ์ -->
+    <div id="printSection" style="display:none;"></div>
+
     <script>
         function calculate() {
             const gender = document.getElementById('gender').value;
@@ -181,6 +275,8 @@
             const weight = parseFloat(document.getElementById('weight').value);
             const height = parseFloat(document.getElementById('height').value);
             const activity = parseFloat(document.getElementById('activity').value);
+            const genderText = gender === 'male' ? 'ชาย' : 'หญิง';
+            const activityText = document.getElementById('activity').options[document.getElementById('activity').selectedIndex].text;
 
             if (!age || !weight || !height) {
                 Swal.fire('ผิดพลาด!', 'กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error');
@@ -202,6 +298,89 @@
             const carbsGram = carbsCalories / 4; // 1 กรัมคาร์โบไฮเดรต = 4 แคลอรี่
             const carbCount = carbsGram / 15; // 1 คาร์บ = 15 กรัมคาร์โบไฮเดรต
             const ricePerDay = Math.round(carbCount); // ปัดเป็นจำนวนเต็ม
+            
+            // สร้างเนื้อหาสำหรับการพิมพ์
+            const printContent = `
+                <div class="print-container">
+                    <div class="print-header">
+                        <h2>ผลการคำนวณโภชนาการ</h2>
+                        <h3>สสอ.โนนสะอาด ชวนนับคาร์บ</h3>
+                        <p>ข้อมูล: เพศ ${genderText} | อายุ ${age} ปี | น้ำหนัก ${weight} กก. | ส่วนสูง ${height} ซม. | กิจกรรม: ${activityText}</p>
+                    </div>
+                    
+                    <div class="print-bmi-status print-${bmiResult.class}">
+                        BMI: ${bmi.toFixed(1)} (${bmiResult.status})
+                    </div>
+                    
+                    <p>BMR: อัตราการใช้พลังงานขั้นพื้นฐาน: <span class="print-highlight">${bmr.toFixed(0)} แคลอรี่/วัน</span></p>
+                    <p>TDEE: อัตราการใช้พลังงานต่อวันโดยรวม: <span class="print-highlight">${tdee.toFixed(0)} แคลอรี่/วัน</span></p>
+                    
+                        <div class="macro-box">
+                            <div class="macro-item">
+                                <h4>พลังงานจากคาร์โบไฮเดรต</h4>
+                                <p  class="highlight">${carbsCalories.toFixed(0)} kcal</p>
+<h6>ควบคุมพลังงานจากคาร์โบไฮเดรตไม่ให้เกิน 20% (แคลอรี่/วัน)</h6>
+                                
+                            </div>
+                            <div class="macro-item">
+                                <h4>ปริมาณคาร์โบไฮเดรต</h4>
+                                <p class="highlight">${carbsGram.toFixed(0)} กรัม/วัน</p>
+<h6>คำนวณจากพลังงานจากคาร์โบไฮเดรต ให้พลังงาน 4 แคลอรี่</h6>
+                                
+                            </div>
+                            <div class="macro-item">
+                                <h4>คาร์บต่อวัน</h4>
+                                <p class="highlight">${carbCount.toFixed(1)} คาร์บ/วัน</p>
+                                <h6>คำนวณจากปริมาณคาร์โบไฮเดรต 15 กรัม หรือข้าวสวย 1 ทัพพี</h6>
+
+                            </div>
+                        </div>
+                    
+                    <div class="print-recommendations">
+                        <h4>คำแนะนำสุขภาพ  (คาร์บที่เหมาะสม ไม่เกิน ${carbCount.toFixed(1)} คาร์บ/วัน) </h4>
+                        <ul>
+                            ${generateRecommendations(bmi, ricePerDay, carbsGram).map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+
+
+					<div class="print-recommendations">
+
+						<h3> ตัวอย่างปริมาณคาร์บในอาหาร </h2>
+                        <h4>🍚 ข้าวแป้ง</h3>
+                        <ul>
+                            <li>ข้าวขาว 1 ทัพพี, ข้าวกล้อง 1 ทัพพี, ข้าวเหนียว ½ ทัพพี, เส้นก๋วยเตี๋ยวสุก 1 ทัพพี, ขนมปัง 1 แผ่นเล็ก, ฟักทองสุก 1 ทัพพี, ข้าวโพดสุก ½ ฝักใหญ่ </li>
+                        </ul>
+                        
+                        <h4>🥦 ผัก</h3>
+                        <ul>
+                            <li> ผัก 1 คาร์บ = 3 ทัพพีสุก เช่น แครอท บร็อคโคลี ดอกกะหล่ำ ข้าวโพดอ่อน  </li>
+                        </ul>
+                        
+                        <h4>🍎 ผลไม้</h3>
+                        <ul>
+                            <li>ผลไม้ขนาดเท่าลูกเทนนิส 1 ลูก = 1 คาร์บ เช่น กล้วยน้ำว้า แอปเปิ้ลเขียว ส้มเขียวหวาน </li>
+                            <li>ผลไม้ขนาดกลาง ½ ลูก = 1 คาร์บ เช่น แอปเปิ้ลลูกใหญ่  แก้วมังกร ฝรั่ง  </li>
+                            <li>ผลไม้ขนาดใหญ่ 6-8 ชิ้นคำ = 1 คาร์บ เช่น แคนตาลูป มะละกอ สัปปะรด </li>
+                            <li>ผลไม้ขนาดเล็กมาก 6 ลูก = 1 คาร์บ เช่น ลองกอง ลำไย ลิ้นจี่ </li>
+                        </ul>
+                        <h4>🥛 นม และเครื่องดื่ม </h3>
+                        <ul>
+                            <li>นมรสจืด 1 แก้ว/ โยเกิร์ตรสธรรมชาติ 1 ถ้วย = 1 คาร์บ  </li>
+                            <li> เครื่องดื่มที่เติมน้ำตาลหรือน้ำเชื่อม 1 ช้อนโต๊ะ = 1 คาร์บ</li>
+                        </ul>
+					</div>
+
+
+                    
+                    <div style="text-align:center; margin-top:15px; font-size:10px;">
+                        <p>พิมพ์วันที่: ${new Date().toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    </div>
+                </div>
+            `;
+
+            // เก็บเนื้อหาสำหรับการพิมพ์ในส่วนที่ซ่อนไว้
+            document.getElementById('printSection').innerHTML = printContent;
 
             Swal.fire({
                 title: '<span style="color:#3498db">ผลการคำนวณ</span>',
@@ -210,27 +389,24 @@
                         <div class="bmi-status ${bmiResult.class}">
                             BMI: ${bmi.toFixed(1)} (${bmiResult.status})
                         </div>
-                        <p>BMR : อัตราการใช้พลังงานขั้นพื้นฐาน(แคลอรี่/วัน): <span class="highlight">${bmr.toFixed(0)}</span> kcal</p>
-                        <p>TDEE : อัตราการใช้พลังงานต่อวันโดยรวม(แคลอรี่/วัน): <span class="highlight">${tdee.toFixed(0)}</span> kcal</p>
+                        <p>BMR : อัตราการใช้พลังงานขั้นพื้นฐาน : <span class="highlight">${bmr.toFixed(0)}</span> (แคลอรี่/วัน)</p>
+                        <p>TDEE : อัตราการใช้พลังงานต่อวันโดยรวม : <span class="highlight">${tdee.toFixed(0)}</span> (แคลอรี่/วัน)</p>
                         
                         <div class="macro-box">
                             <div class="macro-item">
-                                <h3>คาร์โบไฮเดรต</h3>
+                                <h3>พลังงานจากคาร์โบไฮเดรต</h3>
                                 <p  class="highlight">${carbsCalories.toFixed(0)} kcal</p>
-<p>ควบคุมพลังงานจากคาร์โบไฮเดรตไม่ให้เกิน 20% (แคลอรี่/วัน)</p>
-                                
+                                <h6>ควบคุมพลังงานจากคาร์โบไฮเดรตไม่ให้เกิน 20% (แคลอรี่/วัน)</h6>
                             </div>
                             <div class="macro-item">
                                 <h3>ปริมาณคาร์โบไฮเดรต</h3>
                                 <p class="highlight">${carbsGram.toFixed(0)} กรัม/วัน</p>
-<p>คำนวณจากพลังงานจากคาร์โบไฮเดรต ให้พลังงาน 4 แคลอรี่</p>
-                                
+                                <h6>คำนวณจากพลังงานจากคาร์โบไฮเดรต ให้พลังงาน 4 แคลอรี่</h6>
                             </div>
                             <div class="macro-item">
-                                <h3>คาร์บต่อวัน</h3>
+                                <h3>คาร์บที่เหมาะสม</h3>
                                 <p class="highlight">${carbCount.toFixed(1)} คาร์บ/วัน</p>
-                                <p>คำนวณจากปริมาณคาร์โบไฮเดรต 15 กรัม หรือข้าวสวย 1 ทัพพี</p>
-
+                                <h6>คำนวณจากปริมาณคาร์โบไฮเดรต 15 กรัม หรือข้าวสวย 1 ทัพพี</h6>
                             </div>
                         </div>
 
@@ -242,7 +418,18 @@
                         </div>
                     </div>
                 `,
-                width: '90%'
+                width: '90%',
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'สั่งพิมพ์',
+                confirmButtonColor: '#3085d6',
+                showCancelButton: true,
+                cancelButtonText: 'ปิด',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    printResults();
+                }
             });
         }
 
@@ -313,6 +500,28 @@
                 `,
                 width: '90%'
             });
+        }
+
+        // ฟังก์ชันสำหรับพิมพ์ผลลัพธ์
+        function printResults() {
+            const printContent = document.getElementById('printSection').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            
+
+
+
+
+
+
+
+
+            // เรียกใช้งานอีเวนต์ที่จำเป็นหลังจากกลับมาที่หน้าเดิม
+            document.querySelector('.primary-btn').addEventListener('click', calculate);
+            document.querySelector('.secondary-btn').addEventListener('click', showFoodExamples);
         }
     </script>
 </body>
