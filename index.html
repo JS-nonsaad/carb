@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -523,27 +524,67 @@
             });
         }
 
-        // ฟังก์ชันสำหรับพิมพ์ผลลัพธ์
-        function printResults() {
-            const printContent = document.getElementById('printSection').innerHTML;
-            const originalContent = document.body.innerHTML;
-            
-            document.body.innerHTML = printContent;
-            window.print();
-            document.body.innerHTML = originalContent;
-            
-
-
-
-
-
-
-
-
-            // เรียกใช้งานอีเวนต์ที่จำเป็นหลังจากกลับมาที่หน้าเดิม
-            document.querySelector('.primary-btn').addEventListener('click', calculate);
-            document.querySelector('.secondary-btn').addEventListener('click', showFoodExamples);
+function printResults() {
+    // สร้าง iframe ใหม่แทนการแทนที่เนื้อหาของหน้าหลัก
+    const printFrame = document.createElement('iframe');
+    
+    // ซ่อน iframe
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    
+    // เพิ่ม iframe เข้าไปในหน้าเว็บ
+    document.body.appendChild(printFrame);
+    
+    // รอให้ iframe โหลดเสร็จก่อนที่จะเติมเนื้อหา
+    printFrame.onload = function() {
+        // นำเนื้อหาจาก printSection ไปใส่ใน iframe
+        const printContent = document.getElementById('printSection').innerHTML;
+        const frameDoc = printFrame.contentDocument || printFrame.contentWindow.document;
+        
+        // เตรียม HTML สำหรับการพิมพ์
+        frameDoc.open();
+        frameDoc.write('<!DOCTYPE html><html><head>');
+        frameDoc.write('<meta charset="UTF-8">');
+        frameDoc.write('<title>พิมพ์ผลการคำนวณโภชนาการ</title>');
+        
+        // นำ CSS จากหน้าหลักไปใช้
+        const styleTags = document.getElementsByTagName('style');
+        for (let i = 0; i < styleTags.length; i++) {
+            frameDoc.write('<style>' + styleTags[i].innerHTML + '</style>');
         }
+        
+        // นำ Google Fonts ไปใช้
+        const linkTags = document.getElementsByTagName('link');
+        for (let i = 0; i < linkTags.length; i++) {
+            if (linkTags[i].rel === 'stylesheet') {
+                frameDoc.write('<link href="' + linkTags[i].href + '" rel="stylesheet" type="text/css" />');
+            }
+        }
+        
+        frameDoc.write('</head><body>');
+        frameDoc.write(printContent);
+        frameDoc.write('</body></html>');
+        frameDoc.close();
+        
+        // รอให้ iframe โหลดเนื้อหาเสร็จก่อนพิมพ์
+        setTimeout(function() {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+            
+            // ลบ iframe หลังจากพิมพ์เสร็จ
+            setTimeout(function() {
+                document.body.removeChild(printFrame);
+            }, 500);
+        }, 500);
+    };
+    
+    // เริ่มโหลด iframe
+    printFrame.src = 'about:blank';
+}
     </script>
 </body>
 </html>
